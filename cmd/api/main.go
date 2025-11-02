@@ -9,7 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"memory-verse-api/internal/server"
+	"github.com/taiwoajasa245/memory-verse-api/internal/database"
+	"github.com/taiwoajasa245/memory-verse-api/internal/server"
+	"github.com/taiwoajasa245/memory-verse-api/pkg/config"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -38,18 +40,31 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
+	cfg := config.LoadConfig()
+	db := database.New(cfg)
 
-	server := server.NewServer()
+	server := server.NewServer(db, cfg)
+	httpServer := server.HTTPServer()
+
+	server.StartBackgroundJobs()
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
 	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
+	go gracefulShutdown(httpServer, done)
 
-	err := server.ListenAndServe()
+	log.Println("Starting MemoryVerse API on:", cfg.Port)
+
+	err := httpServer.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("http server error: %s", err))
+	}
+
+	if err := db.Close(); err != nil {
+		log.Printf("Error closing DB: %v", err)
+	} else {
+		log.Println("Database connection closed")
 	}
 
 	// Wait for the graceful shutdown to complete

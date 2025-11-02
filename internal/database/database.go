@@ -1,3 +1,5 @@
+//  Database connection & helpers
+
 package database
 
 import (
@@ -5,12 +7,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/taiwoajasa245/memory-verse-api/pkg/config"
 )
 
 // Service represents a service that interacts with a database.
@@ -22,37 +25,69 @@ type Service interface {
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
 	Close() error
+
+	DB() *sql.DB
 }
 
 type service struct {
 	db *sql.DB
 }
 
+func (s *service) DB() *sql.DB {
+	return s.db
+}
+
 var (
-	database   = os.Getenv("BLUEPRINT_DB_DATABASE")
-	password   = os.Getenv("BLUEPRINT_DB_PASSWORD")
-	username   = os.Getenv("BLUEPRINT_DB_USERNAME")
-	port       = os.Getenv("BLUEPRINT_DB_PORT")
-	host       = os.Getenv("BLUEPRINT_DB_HOST")
-	schema     = os.Getenv("BLUEPRINT_DB_SCHEMA")
+	database   string
 	dbInstance *service
+	once       sync.Once
 )
 
-func New() Service {
-	// Reuse Connection
-	if dbInstance != nil {
-		return dbInstance
-	}
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
-	db, err := sql.Open("pgx", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbInstance = &service{
-		db: db,
-	}
+// New creates a database connection from config
+func New(cfg *config.Config) Service {
+	once.Do(func() {
+		database = cfg.DBName
+		connStr := fmt.Sprintf(
+			"postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s",
+			cfg.DBUser,
+			cfg.DBPassword,
+			cfg.DBHost,
+			cfg.DBPort,
+			cfg.DBName,
+			cfg.DBSchema,
+		)
+
+		db, err := sql.Open("pgx", connStr)
+		if err != nil {
+			log.Fatalf("Failed to connect to database: %v", err)
+		}
+
+		if err := db.Ping(); err != nil {
+			log.Fatalf("Database not reachable: %v", err)
+		}
+
+		dbInstance = &service{db: db}
+		log.Println("Database connected successfully")
+	})
+
 	return dbInstance
 }
+
+// func New() Service {
+// 	// Reuse Connection
+// 	if dbInstance != nil {
+// 		return dbInstance
+// 	}
+// 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
+// 	db, err := sql.Open("pgx", connStr)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	dbInstance = &service{
+// 		db: db,
+// 	}
+// 	return dbInstance
+// }
 
 // Health checks the health of the database connection by pinging the database.
 // It returns a map with keys indicating various health statistics.
