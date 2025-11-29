@@ -6,7 +6,6 @@
 // @contact.email ajasataiwo45@gmail.com
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
-// @host localhost:8080
 // @BasePath /memory-verse-api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header

@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
-	_ "github.com/taiwoajasa245/memory-verse-api/docs"
+	"github.com/taiwoajasa245/memory-verse-api/docs"
 
 	"github.com/taiwoajasa245/memory-verse-api/internal/auth"
 	memoryverse "github.com/taiwoajasa245/memory-verse-api/internal/memory_verse"
@@ -35,6 +35,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Get("/memory-verse-api/v1/docs", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/swagger/index.html", http.StatusMovedPermanently)
 	})
+
+	host := s.cfg.SwaggerHost
+	if host == "localhost:8080" {
+		host = "localhost:" + s.cfg.Port
+	}
+	docs.SwaggerInfo.Host = host
+	docs.SwaggerInfo.BasePath = "/memory-verse-api/v1"
+	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	// Serve swagger files from swaggo/files
 	r.Get("/swagger/*", httpSwagger.Handler(

@@ -22,6 +22,7 @@ type Config struct {
 	SmtpPassword string
 	SmtpHost     string
 	SmtpPort     string
+	SwaggerHost  string
 }
 
 // LoadConfig loads environment variables from the .env file
@@ -64,6 +65,7 @@ func LoadConfig() *Config {
 		SmtpPassword: getEnv("SMTP_PASSWORD", ""),
 		SmtpHost:     getEnv("SMTP_HOST", "smtp.gmail.com"),
 		SmtpPort:     getEnv("SMTP_PORT", "587"),
+		SwaggerHost:  getEnv("SWAGGER_HOST", "localhost:8080"),
 	}
 
 	return cfg
