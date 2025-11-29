@@ -42,7 +42,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 	docs.SwaggerInfo.Host = host
 	docs.SwaggerInfo.BasePath = "/memory-verse-api/v1"
-	docs.SwaggerInfo.Schemes = []string{"http", "https"}
+	docs.SwaggerInfo.Schemes = []string{"https"}
 
 	// Serve swagger files from swaggo/files
 	r.Get("/swagger/*", httpSwagger.Handler(
