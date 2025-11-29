@@ -7,15 +7,15 @@ build:
 	@echo "Building..."
 	
 	
-	@go build -o main.exe -tags=dev cmd/api/main.go
+	@go build -o main.exe cmd/api/main.go
 
 # Run the application
 runner:
 	@go run cmd/api/main.go
 run-dev:
-	@go run -tags=dev cmd/api/main.go
+	@APP_ENV=development go run cmd/api/main.go
 run-prod:
-	@go run -tags=prod cmd/api/main.go
+	@APP_ENV=production go run cmd/api/main.go
 
 # Create DB container
 docker-run:

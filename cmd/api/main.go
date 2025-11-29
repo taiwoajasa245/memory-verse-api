@@ -53,8 +53,8 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
-	cfg := config.LoadConfig(config.SelectedEnv())
-	log.Println("ENV Loaded:", config.SelectedEnv())
+	cfg := config.LoadConfig()
+	log.Println("ENV Loaded:", config.GetAppEnv())
 	
 	db := database.New(cfg)
 

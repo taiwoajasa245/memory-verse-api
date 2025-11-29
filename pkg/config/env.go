@@ -25,11 +25,25 @@ type Config struct {
 }
 
 // LoadConfig loads environment variables from the .env file
-func LoadConfig(envFile string) *Config {
-	// Load .env file (only for local/dev)
-	_ = godotenv.Load(envFile)
+func LoadConfig() *Config {
 
-	fmt.Println("loaded: ", envFile)
+	appEnv := os.Getenv("APP_ENV")
+
+	switch appEnv {
+	case "production":
+		if err := godotenv.Load(".env.production"); err == nil {
+			fmt.Println("Loaded .env.production")
+		}
+	default:
+		if err := godotenv.Load(".env.development"); err == nil {
+			fmt.Println("Loaded .env.development")
+		}
+	}
+
+	// Load .env file (only for local/dev)
+	// _ = godotenv.Load(envFile)
+
+	// fmt.Println("loaded: ", envFile)
 
 	// dbPort, err := strconv.Atoi(getEnv("BLUEPRINT_DB_PORT", "5432"))
 	// if err != nil {
