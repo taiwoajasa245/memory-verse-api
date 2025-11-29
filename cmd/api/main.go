@@ -53,7 +53,9 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
-	cfg := config.LoadConfig()
+	cfg := config.LoadConfig(config.SelectedEnv())
+	log.Println("ENV Loaded:", config.SelectedEnv())
+	
 	db := database.New(cfg)
 
 	server := server.NewServer(db, cfg)
@@ -66,7 +68,7 @@ func main() {
 	// Run graceful shutdown in a separate goroutine
 	go gracefulShutdown(httpServer, done)
 
-	log.Println("Starting MemoryVerse API on:", cfg.Port)
+	log.Println("Starting MemoryVerse API on:", cfg.Port, "in", config.GetAppEnv(), "mode")
 
 	err := httpServer.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {

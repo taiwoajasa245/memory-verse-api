@@ -25,6 +25,9 @@ tmp/
 # .env file
 *.env
 .env
+.env.*.local
+.env.development
+.env.production
 
 # Project build
 main

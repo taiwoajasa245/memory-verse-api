@@ -2,6 +2,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -24,9 +25,11 @@ type Config struct {
 }
 
 // LoadConfig loads environment variables from the .env file
-func LoadConfig() *Config {
+func LoadConfig(envFile string) *Config {
 	// Load .env file (only for local/dev)
-	_ = godotenv.Load(".env")
+	_ = godotenv.Load(envFile)
+
+	fmt.Println("loaded: ", envFile)
 
 	// dbPort, err := strconv.Atoi(getEnv("BLUEPRINT_DB_PORT", "5432"))
 	// if err != nil {
